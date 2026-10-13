@@ -39,7 +39,7 @@ namespace CombatTestbed.Core.Domain.Stats
         /// </summary>
         public int TakeDamage(int damage)
         {
-            if (damage <= 0 || IsDead) return 0;
+            if (damage <= 0 || IsDead) { return 0; }
 
             int prevHp = CurrentHp;
             _currentHp = Math.Clamp(prevHp - damage, 0, MaxHp);
