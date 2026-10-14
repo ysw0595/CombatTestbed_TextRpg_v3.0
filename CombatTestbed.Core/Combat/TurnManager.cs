@@ -82,14 +82,14 @@ namespace CombatTestbed.Core.Combat
 
             RoundStarted?.Invoke(CurrentRound);
 
-            // 1. 플레이어 턴 실행
-            ExecuteTurn(Player, playerAction);
+            // 1. 플레이어 턴 실행 (상대는 몬스터)
+            ExecuteTurn(Player, Monster, playerAction);
 
-            // 2. 플레이어 턴에서 전투가 끝나지 않았다면 몬스터 턴 실행 (1단계 검증용 기본 일반 공격)
+            // 2. 플레이어 턴에서 전투가 끝나지 않았다면 몬스터 턴 실행 (상대는 플레이어)
             if (!IsBattleOver)
             {
                 var monsterAction = new AttackAction(Monster, Player);
-                ExecuteTurn(Monster, monsterAction);
+                ExecuteTurn(Monster, Player, monsterAction);
             }
 
             // 3. 전투가 끝났으면 종료 통보, 둘 다 살아남아 턴을 마쳤으면 라운드 차수 증가
@@ -106,11 +106,11 @@ namespace CombatTestbed.Core.Combat
         /// <summary>
         /// 단일 액터의 턴을 진행하고, 턴의 시작과 끝을 알립니다.
         /// </summary>
-        private void ExecuteTurn(BattleActor actor, ICombatAction action)
+        private void ExecuteTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
         {
             TurnStarted?.Invoke(actor);
 
-            ProcessTurn(actor, action);
+            ProcessTurn(actor, opponent, action);
 
             // 도중에 어떤 early return이 있었더라도 시작된 턴은 반드시 여기서 끝을 알림
             TurnEnded?.Invoke(actor);
@@ -119,10 +119,10 @@ namespace CombatTestbed.Core.Combat
         /// <summary>
         /// 단일 액터의 턴 라이프사이클 (시작 상태이상 -> 행동 실행 -> 종료 상태이상)을 처리합니다.
         /// </summary>
-        private void ProcessTurn(BattleActor actor, ICombatAction action)
+        private void ProcessTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
         {
             // 턴 시작 처리: 상태 이상의 구체적인 처리는 액터가 담당
-            actor.StartTurn();
+            actor.StartTurn(opponent);
             if (actor.Health.IsDead) return;
 
             // 행동 실행
@@ -130,7 +130,7 @@ namespace CombatTestbed.Core.Combat
             if (IsBattleOver) return;
 
             // 턴 종료 처리
-            actor.EndTurn();
+            actor.EndTurn(opponent);
         }
     }
 }

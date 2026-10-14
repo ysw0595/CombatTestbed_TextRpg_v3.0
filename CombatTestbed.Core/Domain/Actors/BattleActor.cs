@@ -59,19 +59,21 @@ namespace CombatTestbed.Core.Domain.Actors
         /// <summary>
         /// 턴 시작 처리: 상태 이상의 턴 시작 효과를 발동합니다. 사망한 액터는 무시합니다.
         /// </summary>
-        public void StartTurn()
+        /// <param name="opponent">이 턴의 상대. 상대를 모르는 상황이면 생략합니다.</param>
+        public void StartTurn(BattleActor? opponent = null)
         {
             if (Health.IsDead) return;
-            StatusEffects.ProcessTurnStart(this);
+            StatusEffects.ProcessTurnStart(new TurnContext(this, opponent));
         }
 
         /// <summary>
         /// 턴 종료 처리: 상태 이상의 턴 종료 효과를 발동합니다. 사망한 액터는 무시합니다.
         /// </summary>
-        public void EndTurn()
+        /// <param name="opponent">이 턴의 상대. 상대를 모르는 상황이면 생략합니다.</param>
+        public void EndTurn(BattleActor? opponent = null)
         {
             if (Health.IsDead) return;
-            StatusEffects.ProcessTurnEnd(this);
+            StatusEffects.ProcessTurnEnd(new TurnContext(this, opponent));
         }
 
         /// <summary>

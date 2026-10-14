@@ -56,37 +56,37 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         /// <summary>
         /// 턴 시작 시 모든 상태 이상의 턴 시작 효과를 실행합니다.
         /// </summary>
-        public void ProcessTurnStart(BattleActor target)
+        public void ProcessTurnStart(TurnContext context)
         {
             for (int i = 0; i < _effects.Count; i++)
             {
                 IStatusEffect effect = _effects[i];
                 int stacksBefore = effect.Stacks;
 
-                effect.OnTurnStart(target);
+                effect.OnTurnStart(context);
 
                 NotifyIfStacksChanged(effect, stacksBefore);
             }
 
-            CleanupExpiredEffects(target);
+            CleanupExpiredEffects(context.Owner);
         }
 
         /// <summary>
         /// 턴 종료 시 모든 상태 이상의 턴 종료 효과(독/출혈 틱 데미지 등)를 실행합니다.
         /// </summary>
-        public void ProcessTurnEnd(BattleActor target)
+        public void ProcessTurnEnd(TurnContext context)
         {
             for (int i = 0; i < _effects.Count; i++)
             {
                 IStatusEffect effect = _effects[i];
                 int stacksBefore = effect.Stacks;
 
-                effect.OnTurnEnd(target);
+                effect.OnTurnEnd(context);
 
                 NotifyIfStacksChanged(effect, stacksBefore);
             }
 
-            CleanupExpiredEffects(target);
+            CleanupExpiredEffects(context.Owner);
         }
 
         /// <summary>

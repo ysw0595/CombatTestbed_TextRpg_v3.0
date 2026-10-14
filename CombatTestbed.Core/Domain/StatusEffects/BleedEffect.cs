@@ -31,7 +31,7 @@ namespace CombatTestbed.Core.Domain.StatusEffects
             Stacks += additionalStacks;
         }
 
-        public void OnTurnStart(BattleActor target)
+        public void OnTurnStart(TurnContext context)
         {
             // 출혈은 턴 시작 시점에는 아무 일도 하지 않습니다.
         }
@@ -39,11 +39,11 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         /// <summary>
         /// 턴 종료 시: 현재 중첩 수치만큼 방어 무시 피해를 입히고, 중첩은 유지합니다.
         /// </summary>
-        public void OnTurnEnd(BattleActor target)
+        public void OnTurnEnd(TurnContext context)
         {
-            if (IsExpired || target == null) return;
+            if (IsExpired) return;
 
-            target.ApplyTrueDamage(Stacks);
+            context.Owner.ApplyTrueDamage(Stacks);
         }
 
         public void OnRemove(BattleActor target)

@@ -20,12 +20,12 @@ namespace CombatTestbed.Core.Domain.StatusEffects
             Stacks += additionalStacks;
         }
 
-        public void OnTurnStart(BattleActor target)
+        public void OnTurnStart(TurnContext context)
         {
             // 턴 시작 시점에는 행동 차단을 위해 스택을 그대로 유지합니다.
         }
 
-        public void OnTurnEnd(BattleActor target)
+        public void OnTurnEnd(TurnContext context)
         {
             if (IsExpired) return;
 

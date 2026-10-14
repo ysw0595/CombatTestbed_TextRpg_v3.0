@@ -31,20 +31,20 @@ namespace CombatTestbed.Core.Domain.StatusEffects
             }
         }
 
-        public void OnTurnStart(BattleActor target)
+        public void OnTurnStart(TurnContext context)
         {
             // 중독은 턴 시작 시점에는 아무 일도 하지 않으므로 비워둡니다.
         }
 
         /// <summary>
-        /// 턴 종료 시: 중첩 수치만큼 트루 대미지를 주고 중첩을 1 깎습니다.
+        /// 턴 종료 시: 중첩 수치만큼 방어 무시 피해를 주고 중첩을 1 깎습니다.
         /// </summary>
-        public void OnTurnEnd(BattleActor target)
+        public void OnTurnEnd(TurnContext context)
         {
-            if (IsExpired || target == null) return;
+            if (IsExpired) return;
 
             // 1. 현재 중첩 수치만큼 방어 무시 피해(True Damage)를 입힘
-            target.ApplyTrueDamage(Stacks);
+            context.Owner.ApplyTrueDamage(Stacks);
 
             // 2. 턴 종료 시 중첩 1 감소
             Stacks--;

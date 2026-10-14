@@ -14,19 +14,21 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         bool IsExpired { get; }     // 효과가 다 끝나서 제거되어야 하는지 여부
 
         /// <summary>
-        /// 액터에게 상태 이상이 처음 부여되거나 중첩이 추가될 때 호출됩니다.
+        /// 이미 걸려 있는 상태 이상에 추가 부여로 중첩이 더해질 때 호출됩니다.
+        /// (처음 부여될 때는 호출되지 않습니다.)
         /// </summary>
         void OnApply(BattleActor target, int stacks);
 
         /// <summary>
-        /// 액터의 턴이 시작될 때 발동할 효과 (마비로 인한 행동 불가 체크 등)
+        /// 액터의 턴이 시작될 때 발동할 효과. 소유자와 상대를 컨텍스트로 받습니다.
         /// </summary>
-        void OnTurnStart(BattleActor target);
+        void OnTurnStart(TurnContext context);
 
         /// <summary>
-        /// 액터의 턴이 끝날 때 발동할 효과 (중독/출혈 틱 피해, 지속시간 감소 등)
+        /// 액터의 턴이 끝날 때 발동할 효과 (중독/출혈 틱 피해, 지속시간 감소 등).
+        /// 소유자와 상대를 컨텍스트로 받습니다.
         /// </summary>
-        void OnTurnEnd(BattleActor target);
+        void OnTurnEnd(TurnContext context);
 
         /// <summary>
         /// 상태 이상이 액터에게서 제거될 때 정리(Cleanup) 작업을 수행합니다.
