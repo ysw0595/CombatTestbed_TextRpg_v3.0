@@ -6,10 +6,27 @@ namespace CombatTestbed.Core.Domain.StatusEffects
 {
     /// <summary>
     /// 액터가 보유한 모든 상태 이상을 관리하고, 턴 생명주기에 맞춰 발동 및 제거를 담당하는 컨테이너입니다.
+    /// 변화는 이벤트로 외부에 알립니다. (핸들러는 읽기 전용 관찰자여야 하며, 핸들러 안에서 컨테이너를 변경하면 안 됩니다.)
     /// </summary>
     public class StatusEffectContainer
     {
         private readonly List<IStatusEffect> _effects = new List<IStatusEffect>();
+
+        /// <summary>
+        /// 새로운 종류의 상태 이상이 처음 걸렸을 때 발행됩니다. (이미 걸린 효과의 중첩은 StacksChanged)
+        /// </summary>
+        public event Action<IStatusEffect>? EffectApplied;
+
+        /// <summary>
+        /// 이미 걸린 상태 이상의 스택이 바뀌었을 때 발행됩니다. (추가 부여, 턴 틱)
+        /// 스택이 0이 되어 소멸하는 경우에는 발행하지 않고 EffectRemoved만 발행합니다.
+        /// </summary>
+        public event Action<IStatusEffect>? EffectStacksChanged;
+
+        /// <summary>
+        /// 상태 이상이 컨테이너에서 제거된 직후 발행됩니다. (만료, 정화, 일괄 제거)
+        /// </summary>
+        public event Action<IStatusEffect>? EffectRemoved;
 
         /// <summary>
         /// 새로운 상태 이상을 부여하거나 기존 상태 이상의 중첩(Stack)을 증가시킵니다.
@@ -24,12 +41,15 @@ namespace CombatTestbed.Core.Domain.StatusEffects
             if (existing != null)
             {
                 // 이미 있다면 기존 효과에 새로 들어온 효과의 스택만큼 합산
+                int stacksBefore = existing.Stacks;
                 existing.OnApply(target, newEffect.Stacks);
+                NotifyIfStacksChanged(existing, stacksBefore);
             }
             else
             {
                 // 처음 걸리는 효과라면 이미 newEffect 내부에 초기 스택이 있으므로 그대로 리스트에 등록
                 _effects.Add(newEffect);
+                EffectApplied?.Invoke(newEffect);
             }
         }
 
@@ -40,7 +60,12 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         {
             for (int i = 0; i < _effects.Count; i++)
             {
-                _effects[i].OnTurnStart(target);
+                IStatusEffect effect = _effects[i];
+                int stacksBefore = effect.Stacks;
+
+                effect.OnTurnStart(target);
+
+                NotifyIfStacksChanged(effect, stacksBefore);
             }
 
             CleanupExpiredEffects(target);
@@ -53,7 +78,12 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         {
             for (int i = 0; i < _effects.Count; i++)
             {
-                _effects[i].OnTurnEnd(target);
+                IStatusEffect effect = _effects[i];
+                int stacksBefore = effect.Stacks;
+
+                effect.OnTurnEnd(target);
+
+                NotifyIfStacksChanged(effect, stacksBefore);
             }
 
             CleanupExpiredEffects(target);
@@ -69,9 +99,7 @@ namespace CombatTestbed.Core.Domain.StatusEffects
             {
                 if (_effects[i].IsExpired)
                 {
-                    IStatusEffect expired = _effects[i];
-                    _effects.RemoveAt(i);
-                    expired.OnRemove(target);
+                    RemoveAtAndNotify(i, target);
                 }
             }
         }
@@ -98,11 +126,10 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         /// </summary>
         public void Clear(BattleActor target)
         {
-            for (int i = 0; i < _effects.Count; i++)
+            for (int i = _effects.Count - 1; i >= 0; i--)
             {
-                _effects[i].OnRemove(target);
+                RemoveAtAndNotify(i, target);
             }
-            _effects.Clear();
         }
 
         /// <summary>
@@ -110,12 +137,35 @@ namespace CombatTestbed.Core.Domain.StatusEffects
         /// </summary>
         public bool RemoveEffect(BattleActor target, StatusEffectType type)
         {
-            IStatusEffect effect = _effects.Find(e => e.Type == type);
-            if (effect == null) return false;
+            int index = _effects.FindIndex(e => e.Type == type);
+            if (index < 0) return false;
 
-            effect.OnRemove(target);
-            _effects.Remove(effect);
+            RemoveAtAndNotify(index, target);
             return true;
+        }
+
+        /// <summary>
+        /// 효과를 목록에서 빼고 정리(OnRemove)한 뒤, 그 사실을 알립니다. (제거 경로의 공통 처리)
+        /// </summary>
+        private void RemoveAtAndNotify(int index, BattleActor target)
+        {
+            IStatusEffect effect = _effects[index];
+            _effects.RemoveAt(index);
+            effect.OnRemove(target);
+
+            EffectRemoved?.Invoke(effect);
+        }
+
+        /// <summary>
+        /// 스택이 바뀌었고 아직 살아 있는 효과에 대해서만 StacksChanged를 발행합니다.
+        /// (만료되는 효과는 곧 Removed가 발행되므로 중복 통보하지 않음)
+        /// </summary>
+        private void NotifyIfStacksChanged(IStatusEffect effect, int stacksBefore)
+        {
+            if (effect.Stacks != stacksBefore && !effect.IsExpired)
+            {
+                EffectStacksChanged?.Invoke(effect);
+            }
         }
     }
 }
