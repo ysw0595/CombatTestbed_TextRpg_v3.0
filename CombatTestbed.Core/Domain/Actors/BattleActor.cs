@@ -24,10 +24,21 @@ namespace CombatTestbed.Core.Domain.Actors
         // 상태 이상 컨테이너 주머니
         public StatusEffectContainer StatusEffects { get; } = new StatusEffectContainer();
 
-        // 순수 C# 도메인 이벤트: 콘솔/UI 등 외부에 상태 변화를 알림
-        public event Action<BattleActor, int>? OnDamageTaken;
-        public event Action<BattleActor, int>? OnHealed;
-        public event Action<BattleActor>? OnDied;
+        /// <summary>
+        /// 피해를 입었을 때 발행됩니다. (액터, 실제로 깎인 피해량)
+        /// 체력 반영이 끝난 뒤에 발행되며, 실피해가 0이면 발행하지 않습니다.
+        /// </summary>
+        public event Action<BattleActor, int>? DamageTaken;
+
+        /// <summary>
+        /// 체력이 회복되었을 때 발행됩니다. (액터, 오버힐을 제외한 실제 회복량)
+        /// </summary>
+        public event Action<BattleActor, int>? Healed;
+
+        /// <summary>
+        /// 사망했을 때 딱 한 번 발행됩니다. 같은 피해에 대해서는 DamageTaken 다음에 발행됩니다.
+        /// </summary>
+        public event Action<BattleActor>? Died;
 
         public BattleActor(string id, string name, ActorRole role, StatSheet stats)
         {
@@ -97,7 +108,7 @@ namespace CombatTestbed.Core.Domain.Actors
             int actualHeal = Health.Heal(amount);
             if (actualHeal > 0)
             {
-                OnHealed?.Invoke(this, actualHeal);
+                Healed?.Invoke(this, actualHeal);
             }
 
             return actualHeal;
@@ -111,12 +122,12 @@ namespace CombatTestbed.Core.Domain.Actors
             int actualDamage = Health.TakeDamage(finalDamage);
             if (actualDamage > 0)
             {
-                OnDamageTaken?.Invoke(this, actualDamage);
+                DamageTaken?.Invoke(this, actualDamage);
             }
 
             if (Health.IsDead)
             {
-                OnDied?.Invoke(this);
+                Died?.Invoke(this);
             }
 
             return actualDamage;
