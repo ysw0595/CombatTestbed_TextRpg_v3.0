@@ -1,7 +1,8 @@
-﻿using System;
-using NUnit.Framework;
-using CombatTestbed.Core.Domain.Actors;
+﻿using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.Stats;
+using CombatTestbed.Tests.TestUtils;
+using NUnit.Framework;
+using System;
 
 namespace CombatTestbed.Tests.Domain.Actors
 {
@@ -9,12 +10,7 @@ namespace CombatTestbed.Tests.Domain.Actors
     public class BattleActorTests
     {
         private BattleActor CreateTestActor(int maxHp, int defense)
-        {
-            var stats = new StatSheet();
-            stats.SetStat(StatType.MaxHp, maxHp);
-            stats.SetStat(StatType.Defense, defense);
-            return new BattleActor(Guid.NewGuid().ToString(), "테스트 액터", ActorRole.Enemy, stats);
-        }
+    => TestActorFactory.Create("테스트 액터", ActorRole.Enemy, maxHp, defense: defense);
 
         [Test]
         public void ApplyDamage는_방어력을_차감한_실피해를_반환하고_체력에_반영해야_한다()

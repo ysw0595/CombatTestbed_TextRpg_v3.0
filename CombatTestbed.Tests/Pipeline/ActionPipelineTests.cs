@@ -1,10 +1,11 @@
-﻿using System;
-using NUnit.Framework;
-using CombatTestbed.Core.Actions;
+﻿using CombatTestbed.Core.Actions;
 using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
 using CombatTestbed.Core.Pipeline;
+using CombatTestbed.Tests.TestUtils;
+using NUnit.Framework;
+using System;
 
 namespace CombatTestbed.Tests.Pipeline
 {
@@ -20,14 +21,7 @@ namespace CombatTestbed.Tests.Pipeline
         }
 
         private BattleActor CreateTestActor(string name, int maxHp, int attack, int defense)
-        {
-            var stats = new StatSheet();
-            stats.SetStat(StatType.MaxHp, maxHp);
-            stats.SetStat(StatType.Attack, attack);
-            stats.SetStat(StatType.Defense, defense);
-
-            return new BattleActor(Guid.NewGuid().ToString(), name, ActorRole.Player, stats);
-        }
+    => TestActorFactory.Create(name, ActorRole.Player, maxHp, attack, defense);
 
         [Test]
         public void 파이프라인에_null_액션을_전달하면_ArgumentNullException을_던져야_한다()

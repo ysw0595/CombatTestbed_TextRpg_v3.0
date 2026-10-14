@@ -4,22 +4,15 @@ using CombatTestbed.Core.Actions;
 using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
+using CombatTestbed.Tests.TestUtils;
 
 namespace CombatTestbed.Tests.Actions
 {
     [TestFixture]
     public class AttackActionTests
     {
-        // 테스트용 액터를 편하게 만들기 위한 헬퍼 메서드
         private BattleActor CreateTestActor(string name, int maxHp, int attack, int defense)
-        {
-            var stats = new StatSheet();
-            stats.SetStat(StatType.MaxHp, maxHp);
-            stats.SetStat(StatType.Attack, attack);
-            stats.SetStat(StatType.Defense, defense);
-
-            return new BattleActor(Guid.NewGuid().ToString(), name, ActorRole.Player,stats);
-        }
+    => TestActorFactory.Create(name, ActorRole.Player, maxHp, attack, defense);
 
         [Test]
         public void 정상적인_일반공격시_방어력을_반영해_피해를_입히고_성공_결과를_반환해야_한다()

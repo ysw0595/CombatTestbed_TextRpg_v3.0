@@ -4,6 +4,7 @@ using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
 using CombatTestbed.Core.Pipeline;
+using CombatTestbed.Tests.TestUtils;
 using NUnit.Framework;
 using System;
 
@@ -21,14 +22,7 @@ namespace CombatTestbed.Tests.Combat
         }
 
         private BattleActor CreateTestActor(string name, ActorRole role, int maxHp, int attack, int defense)
-        {
-            var stats = new StatSheet();
-            stats.SetStat(StatType.MaxHp, maxHp);
-            stats.SetStat(StatType.Attack, attack);
-            stats.SetStat(StatType.Defense, defense);
-
-            return new BattleActor(Guid.NewGuid().ToString(), name, role, stats);
-        }
+    => TestActorFactory.Create(name, role, maxHp, attack, defense);
 
         [Test]
         public void 정상적인_1라운드_진행시_양측이_행동하고_라운드_차수가_증가해야_한다()

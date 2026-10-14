@@ -1,7 +1,8 @@
-﻿using NUnit.Framework;
-using CombatTestbed.Core.Domain.Actors;
+﻿using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
+using CombatTestbed.Tests.TestUtils;
+using NUnit.Framework;
 
 namespace CombatTestbed.Tests.Domain.StatusEffects
 {
@@ -9,13 +10,7 @@ namespace CombatTestbed.Tests.Domain.StatusEffects
     public class StatusEffectTests
     {
         private BattleActor CreateTestTarget(int maxHp, int defense)
-        {
-            StatSheet stats = new StatSheet();
-            stats.SetStat(StatType.MaxHp, maxHp);
-            stats.SetStat(StatType.Defense, defense);
-
-            return new BattleActor("test_dummy", "훈련용 허수아비", ActorRole.Enemy, stats);
-        }
+    => TestActorFactory.Create("훈련용 허수아비", ActorRole.Enemy, maxHp, defense: defense);
 
         [Test]
         public void 중독_적용시_턴종료때_방어무시_피해를_입히고_스택이_1_감소해야_한다()
