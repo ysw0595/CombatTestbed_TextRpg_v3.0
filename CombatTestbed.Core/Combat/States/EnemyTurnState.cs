@@ -13,8 +13,16 @@ namespace CombatTestbed.Core.Combat.States
 
         public override void Enter()
         {
-            ICombatAction action = Owner.SelectMonsterAction();
-            Owner.RunTurn(Owner.Monster, Owner.Player, action);
+            if (Owner.Monster.CanAct)
+            {
+                ICombatAction action = Owner.SelectMonsterAction();
+                Owner.RunTurn(Owner.Monster, Owner.Player, action);
+            }
+            else
+            {
+                // 행동 불능: 행동 선택 없이 턴을 건너뜀
+                Owner.SkipTurn(Owner.Monster, Owner.Player);
+            }
 
             if (Owner.IsBattleOver)
             {

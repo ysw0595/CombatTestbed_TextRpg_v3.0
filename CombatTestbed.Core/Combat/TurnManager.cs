@@ -74,6 +74,11 @@ namespace CombatTestbed.Core.Combat
         /// (턴 도중 전투가 끝나 일부 처리가 생략된 경우에도 발행됩니다.)
         /// </summary>
         public event Action<BattleActor>? TurnEnded;
+        /// <summary>
+        /// 액터가 행동할 수 없는 상태(마비 등)여서 행동 없이 턴을 넘길 때 발행됩니다.
+        /// 턴 시작 상태이상 처리 뒤, 턴 종료 상태이상 처리 앞에 발행되며 TurnStarted/TurnEnded 사이에 놓입니다.
+        /// </summary>
+        public event Action<BattleActor>? TurnSkipped;
 
         /// <summary>
         /// 전투가 끝났을 때 한 번 발행됩니다. (승자, 무승부면 null) 마지막 TurnEnded 다음에 발행됩니다.
@@ -106,6 +111,7 @@ namespace CombatTestbed.Core.Combat
 
         /// <summary>
         /// 전투를 시작하고 플레이어 입력을 기다리는 단계로 들어갑니다.
+        /// 플레이어가 시작부터 행동 불능이면 입력을 기다리지 않고 라운드가 자동으로 진행될 수 있습니다.
         /// </summary>
         public void Start()
         {
@@ -123,8 +129,9 @@ namespace CombatTestbed.Core.Combat
         }
 
         /// <summary>
-        /// 플레이어 행동을 제출합니다. 제출된 행동으로 플레이어 턴이 진행되고,
-        /// 이어서 적 턴이 자동으로 진행된 뒤 다음 입력 대기(또는 전투 종료) 단계가 됩니다.
+        /// 플레이어 행동을 제출합니다. 제출된 행동으로 플레이어 턴이 진행되고, 이어서 적 턴이 자동으로 진행됩니다.
+        /// 다음 라운드에서 플레이어가 행동 불능이면 그 턴도 자동으로 넘기며,
+        /// 플레이어의 입력이 다시 필요해지거나 전투가 끝나는 시점에 반환됩니다.
         /// </summary>
         public void SubmitPlayerAction(ICombatAction playerAction)
         {
@@ -141,6 +148,8 @@ namespace CombatTestbed.Core.Combat
         /// <summary>
         /// 1개 라운드를 진행합니다. (아직 시작 전이면 먼저 Start한 뒤, 행동 제출 -> 적 턴 -> 라운드 증가)
         /// 상태 머신 도입 이전의 호출 방식과 호환하기 위한 편의 메서드입니다.
+        /// 시작하자마자 행동 불능(마비 등)으로 라운드가 이미 자동 진행되었다면, 그 라운드가 이번 호출의
+        /// 라운드로 간주되어 전달된 행동은 사용되지 않습니다.
         /// </summary>
         public void ExecuteRound(ICombatAction playerAction)
         {
@@ -153,7 +162,13 @@ namespace CombatTestbed.Core.Combat
 
             if (_machine.Current == null)
             {
+                int roundBeforeStart = CurrentRound;
                 Start();
+
+                if (CurrentRound != roundBeforeStart || IsBattleOver)
+                {
+                    return;
+                }
             }
 
             SubmitPlayerAction(playerAction);
@@ -189,9 +204,23 @@ namespace CombatTestbed.Core.Combat
         internal void GoToBattleOver() => _machine.ChangeState(_battleOverState);
 
         /// <summary>
-        /// 단일 액터의 턴을 진행하고, 턴의 시작과 끝을 알립니다.
+        /// 단일 액터의 턴을 지정한 행동으로 진행하고, 턴의 시작과 끝을 알립니다.
         /// </summary>
         internal void RunTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
+        {
+            ExecuteTurn(actor, opponent, action);
+        }
+
+        /// <summary>
+        /// 행동 없이 턴을 넘깁니다. (행동 불능 상태) 상태이상 처리와 이벤트 쌍은 정상 턴과 동일하게 유지됩니다.
+        /// </summary>
+        internal void SkipTurn(BattleActor actor, BattleActor opponent)
+        {
+            ExecuteTurn(actor, opponent, null);
+        }
+
+        /// <param name="action">실행할 행동. null이면 행동 없이 턴을 넘기는 스킵 턴입니다.</param>
+        private void ExecuteTurn(BattleActor actor, BattleActor opponent, ICombatAction? action)
         {
             TurnStarted?.Invoke(actor);
 
@@ -202,17 +231,25 @@ namespace CombatTestbed.Core.Combat
         }
 
         /// <summary>
-        /// 단일 액터의 턴 라이프사이클 (시작 상태이상 -> 행동 실행 -> 종료 상태이상)을 처리합니다.
+        /// 단일 액터의 턴 라이프사이클 (시작 상태이상 -> 행동 실행 또는 스킵 -> 종료 상태이상)을 처리합니다.
         /// </summary>
-        private void ProcessTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
+        private void ProcessTurn(BattleActor actor, BattleActor opponent, ICombatAction? action)
         {
             // 턴 시작 처리: 상태 이상의 구체적인 처리는 액터가 담당
             actor.StartTurn(opponent);
             if (actor.Health.IsDead) return;
 
-            // 행동 실행
-            Pipeline.Execute(action);
-            if (IsBattleOver) return;
+            if (action != null)
+            {
+                // 행동 실행
+                Pipeline.Execute(action);
+                if (IsBattleOver) return;
+            }
+            else
+            {
+                // 행동할 수 없어 턴을 넘기는 경우
+                TurnSkipped?.Invoke(actor);
+            }
 
             // 턴 종료 처리
             actor.EndTurn(opponent);

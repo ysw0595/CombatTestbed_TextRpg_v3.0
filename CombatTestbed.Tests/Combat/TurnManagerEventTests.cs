@@ -33,6 +33,7 @@ namespace CombatTestbed.Tests.Combat
             turnManager.BattleEnded += winner => log.Add($"BattleEnded:{WinnerName(winner)}");
             turnManager.Pipeline.ActionResolved +=
                 r => log.Add($"ActionResolved:{r.Source.Name}:{Describe(r)}");
+            turnManager.TurnSkipped += actor => log.Add($"TurnSkipped:{actor.Name}");
             return turnManager;
         }
 
@@ -138,7 +139,7 @@ namespace CombatTestbed.Tests.Combat
         }
 
         [Test]
-        public void 마비로_행동이_실패해도_턴의_시작과_끝은_쌍으로_발행되어야_한다()
+        public void 마비로_행동할_수_없으면_ActionResolved_없이_TurnSkipped가_발행되고_턴의_시작과_끝은_쌍으로_발행되어야_한다()
         {
             var player = TestActorFactory.Create(name: "용사", role: ActorRole.Player, maxHp: 100, attack: 20);
             var monster = TestActorFactory.Create(name: "고블린", role: ActorRole.Enemy, maxHp: 100, attack: 10);
@@ -150,14 +151,14 @@ namespace CombatTestbed.Tests.Combat
 
             Assert.That(log.Entries, Is.EqualTo(new[]
             {
-                "RoundStarted:1",
-                "TurnStarted:용사",
-                "ActionResolved:용사:Failure",
-                "TurnEnded:용사",
-                "TurnStarted:고블린",
-                "ActionResolved:고블린:Success",
-                "TurnEnded:고블린"
-            }));
+        "RoundStarted:1",
+        "TurnStarted:용사",
+        "TurnSkipped:용사",          // 행동 시도(ActionResolved) 대신 스킵 통보
+        "TurnEnded:용사",
+        "TurnStarted:고블린",
+        "ActionResolved:고블린:Success",
+        "TurnEnded:고블린"
+    }));
         }
 
         [Test]
