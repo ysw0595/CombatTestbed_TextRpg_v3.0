@@ -60,7 +60,7 @@ namespace CombatTestbed.Tests.Common
             machine.ChangeState(a);
 
             Assert.That(machine.Current, Is.SameAs(a));
-            Assert.That(log.Entries, Is.EqualTo(new[] { "Enter:A", "Changed:None->A" }));
+            Assert.That(log.Entries, Is.EqualTo(new[] { "Changed:None->A", "Enter:A" }));
         }
 
         [Test]
@@ -75,11 +75,7 @@ namespace CombatTestbed.Tests.Common
             machine.ChangeState(b);
 
             Assert.That(machine.Current, Is.SameAs(b));
-            Assert.That(log.Entries, Is.EqualTo(new[]
-            {
-                "Enter:A", "Changed:None->A",
-                "Exit:A", "Enter:B", "Changed:A->B"
-            }));
+            Assert.That(log.Entries, Is.EqualTo(new[] { "Changed:None->A", "Enter:A", "Exit:A", "Changed:A->B", "Enter:B" }));
         }
 
         [Test]
@@ -92,11 +88,7 @@ namespace CombatTestbed.Tests.Common
 
             machine.ChangeState(a);
 
-            Assert.That(log.Entries, Is.EqualTo(new[]
-            {
-                "Enter:A", "Changed:None->A",
-                "Exit:A", "Enter:A", "Changed:A->A"
-            }));
+            Assert.That(log.Entries, Is.EqualTo(new[] { "Changed:None->A", "Enter:A", "Exit:A", "Changed:A->A", "Enter:A" }));
         }
 
         [Test]
@@ -114,11 +106,11 @@ namespace CombatTestbed.Tests.Common
             // A->B 통보가 먼저, 그 뒤에 B->C가 처리됨 (통보 순서가 뒤집히지 않음)
             Assert.That(machine.Current, Is.SameAs(c));
             Assert.That(log.Entries, Is.EqualTo(new[]
-            {
-                "Enter:A", "Changed:None->A",
-                "Exit:A", "Enter:B", "Changed:A->B",
-                "Exit:B", "Enter:C", "Changed:B->C"
-            }));
+{
+    "Changed:None->A", "Enter:A",
+    "Exit:A", "Changed:A->B", "Enter:B",
+    "Exit:B", "Changed:B->C", "Enter:C"
+}));
         }
 
         [Test]
@@ -134,11 +126,11 @@ namespace CombatTestbed.Tests.Common
 
             Assert.That(machine.Current, Is.SameAs(d));
             Assert.That(log.Entries, Is.EqualTo(new[]
-            {
-                "Enter:B", "Changed:None->B",
-                "Exit:B", "Enter:C", "Changed:B->C",
-                "Exit:C", "Enter:D", "Changed:C->D"
-            }));
+{
+    "Changed:None->B", "Enter:B",
+    "Exit:B", "Changed:B->C", "Enter:C",
+    "Exit:C", "Changed:C->D", "Enter:D"
+}));
         }
 
         [Test]

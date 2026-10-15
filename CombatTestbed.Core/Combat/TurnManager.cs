@@ -1,5 +1,7 @@
 ﻿using System;
 using CombatTestbed.Core.Actions;
+using CombatTestbed.Core.Combat.States;
+using CombatTestbed.Core.Common;
 using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Pipeline;
 
@@ -7,19 +9,30 @@ namespace CombatTestbed.Core.Combat
 {
     /// <summary>
     /// 플레이어 선공, 몬스터 후공의 라운드 순환과 전투 종료 조건을 총괄하는 턴 관리자입니다.
-    /// 진행 상황은 이벤트로 외부에 알립니다. (핸들러는 읽기 전용 관찰자여야 합니다.)
+    /// 전투 흐름은 상태 패턴(FSM)으로 관리하고, 진행 상황은 이벤트로 외부에 알립니다.
+    /// (이벤트 핸들러는 읽기 전용 관찰자여야 합니다.)
     /// </summary>
     public class TurnManager
     {
+        private readonly IActionSelector _monsterSelector;
+        private readonly StateMachine<IBattleState> _machine = new StateMachine<IBattleState>();
+        private readonly IBattleState _playerTurnState;
+        private readonly IBattleState _enemyTurnState;
+        private readonly IBattleState _battleOverState;
+
         public BattleActor Player { get; }
         public BattleActor Monster { get; }
         public ActionPipeline Pipeline { get; }
-        private readonly IActionSelector _monsterSelector;
 
         /// <summary>
         /// 현재 전투 라운드 (1부터 시작)
         /// </summary>
         public int CurrentRound { get; private set; }
+
+        /// <summary>
+        /// 현재 전투 단계. Start() 전에는 NotStarted입니다.
+        /// </summary>
+        public BattlePhase Phase => _machine.Current?.Phase ?? BattlePhase.NotStarted;
 
         /// <summary>
         /// 둘 중 하나라도 사망하면 전투 종료
@@ -40,7 +53,14 @@ namespace CombatTestbed.Core.Combat
         }
 
         /// <summary>
-        /// 라운드가 시작될 때 발행됩니다. (라운드 번호)
+        /// 전투 단계가 바뀔 때 발행됩니다. (이전 단계, 새 단계)
+        /// 새 단계에서 일어나는 일(턴 실행 등)의 이벤트보다 먼저 발행됩니다.
+        /// 입력 버튼을 켜고 끄는 용도로 사용합니다.
+        /// </summary>
+        public event Action<BattlePhase, BattlePhase>? PhaseChanged;
+
+        /// <summary>
+        /// 라운드가 실제로 진행되기 시작할 때(플레이어 행동이 접수된 직후) 발행됩니다. (라운드 번호)
         /// </summary>
         public event Action<int>? RoundStarted;
 
@@ -60,7 +80,11 @@ namespace CombatTestbed.Core.Combat
         /// </summary>
         public event Action<BattleActor?>? BattleEnded;
 
-        public TurnManager(BattleActor player, BattleActor monster, ActionPipeline pipeline, IActionSelector? monsterSelector = null)
+        public TurnManager(
+            BattleActor player,
+            BattleActor monster,
+            ActionPipeline pipeline,
+            IActionSelector? monsterSelector = null)
         {
             Player = player ?? throw new ArgumentNullException(nameof(player));
             Monster = monster ?? throw new ArgumentNullException(nameof(monster));
@@ -69,50 +93,105 @@ namespace CombatTestbed.Core.Combat
             // 지정하지 않으면 기본 일반 공격 (기존 동작 유지)
             _monsterSelector = monsterSelector ?? new BasicAttackSelector();
 
+            _playerTurnState = new PlayerTurnState(this);
+            _enemyTurnState = new EnemyTurnState(this);
+            _battleOverState = new BattleOverState(this);
+
+            // 상태 머신의 전환 통보를 공개용 단계(BattlePhase)로 변환해 외부에 전달
+            _machine.StateChanged += (previous, next) =>
+                PhaseChanged?.Invoke(previous?.Phase ?? BattlePhase.NotStarted, next.Phase);
+
             CurrentRound = 1;
         }
 
         /// <summary>
-        /// 1개 라운드를 진행합니다. (플레이어 행동 -> 몬스터 행동 -> 라운드 증가)
+        /// 전투를 시작하고 플레이어 입력을 기다리는 단계로 들어갑니다.
+        /// </summary>
+        public void Start()
+        {
+            if (_machine.Current != null)
+            {
+                throw new InvalidOperationException("이미 시작된 전투입니다.");
+            }
+
+            if (IsBattleOver)
+            {
+                throw new InvalidOperationException("이미 종료된 전투는 시작할 수 없습니다.");
+            }
+
+            _machine.ChangeState(_playerTurnState);
+        }
+
+        /// <summary>
+        /// 플레이어 행동을 제출합니다. 제출된 행동으로 플레이어 턴이 진행되고,
+        /// 이어서 적 턴이 자동으로 진행된 뒤 다음 입력 대기(또는 전투 종료) 단계가 됩니다.
+        /// </summary>
+        public void SubmitPlayerAction(ICombatAction playerAction)
+        {
+            if (playerAction == null) throw new ArgumentNullException(nameof(playerAction));
+
+            if (_machine.Current == null)
+            {
+                throw new InvalidOperationException("전투가 시작되지 않았습니다. Start()를 먼저 호출하세요.");
+            }
+
+            _machine.Current.SubmitPlayerAction(playerAction);
+        }
+
+        /// <summary>
+        /// 1개 라운드를 진행합니다. (아직 시작 전이면 먼저 Start한 뒤, 행동 제출 -> 적 턴 -> 라운드 증가)
+        /// 상태 머신 도입 이전의 호출 방식과 호환하기 위한 편의 메서드입니다.
         /// </summary>
         public void ExecuteRound(ICombatAction playerAction)
         {
-            ArgumentNullException.ThrowIfNull(playerAction);
+            if (playerAction == null) throw new ArgumentNullException(nameof(playerAction));
 
             if (IsBattleOver)
             {
                 throw new InvalidOperationException("이미 종료된 전투에서는 라운드를 진행할 수 없습니다.");
             }
 
-            RoundStarted?.Invoke(CurrentRound);
-
-            // 1. 플레이어 턴 실행 (상대는 몬스터)
-            ExecuteTurn(Player, Monster, playerAction);
-
-            // 2. 플레이어 턴에서 전투가 끝나지 않았다면 몬스터 턴 실행 (행동은 선택기가 결정)
-            if (!IsBattleOver)
+            if (_machine.Current == null)
             {
-                ICombatAction monsterAction = _monsterSelector.SelectAction(Monster, Player)
-                    ?? throw new InvalidOperationException("몬스터 행동 선택기가 null 행동을 반환했습니다.");
-
-                ExecuteTurn(Monster, Player, monsterAction);
+                Start();
             }
 
-            // 3. 전투가 끝났으면 종료 통보, 둘 다 살아남아 턴을 마쳤으면 라운드 차수 증가
-            if (IsBattleOver)
-            {
-                BattleEnded?.Invoke(Winner);
-            }
-            else
-            {
-                CurrentRound++;
-            }
+            SubmitPlayerAction(playerAction);
         }
+
+        // ---- 아래는 같은 어셈블리의 전투 상태 클래스들이 사용하는 내부 동작입니다. ----
+
+        internal void BeginRound()
+        {
+            RoundStarted?.Invoke(CurrentRound);
+        }
+
+        internal void AdvanceRound()
+        {
+            CurrentRound++;
+        }
+
+        internal void NotifyBattleEnded()
+        {
+            BattleEnded?.Invoke(Winner);
+        }
+
+        internal ICombatAction SelectMonsterAction()
+        {
+            return _monsterSelector.SelectAction(Monster, Player)
+                ?? throw new InvalidOperationException("몬스터 행동 선택기가 null 행동을 반환했습니다.");
+        }
+
+        internal void GoToPlayerTurn() => _machine.ChangeState(_playerTurnState);
+
+        internal void GoToEnemyTurn() => _machine.ChangeState(_enemyTurnState);
+
+        internal void GoToBattleOver() => _machine.ChangeState(_battleOverState);
 
         /// <summary>
         /// 단일 액터의 턴을 진행하고, 턴의 시작과 끝을 알립니다.
         /// </summary>
-        private void ExecuteTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
+        internal void RunTurn(BattleActor actor, BattleActor opponent, ICombatAction action)
         {
             TurnStarted?.Invoke(actor);
 

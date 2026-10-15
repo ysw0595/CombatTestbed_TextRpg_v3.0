@@ -18,13 +18,13 @@ namespace CombatTestbed.Core.Common
         public TState? Current { get; private set; }
 
         /// <summary>
-        /// 상태 전이가 끝난 뒤 발행됩니다. (이전 상태, 새 상태) 처음 진입이면 이전 상태는 null입니다.
-        /// 새 상태의 Enter가 끝난 뒤에 발행되며, Enter 안에서 요청된 다음 전이는 이 통보 뒤에 처리됩니다.
+        /// 상태 전환이 끝난 직후, 새 상태의 Enter가 호출되기 직전에 발행됩니다. (이전 상태, 새 상태)
+        /// 처음 진입이면 이전 상태는 null입니다. 이 시점에 Current는 이미 새 상태입니다.
         /// </summary>
         public event Action<TState?, TState>? StateChanged;
 
         /// <summary>
-        /// 새 상태로 전이합니다. (이전 상태 Exit -> 새 상태 Enter -> StateChanged)
+        /// 새 상태로 전이합니다. (이전 상태 Exit -> StateChanged -> 새 상태 Enter)
         /// 같은 상태로의 전이는 다시 진입(Exit 후 Enter)합니다.
         /// 전이 도중(주로 Enter 안)에 호출하면 즉시 실행하지 않고, 진행 중인 전이가 끝난 뒤 순서대로 처리합니다.
         /// </summary>
@@ -47,9 +47,8 @@ namespace CombatTestbed.Core.Common
 
                     previous?.Exit();
                     Current = target;
+                    StateChanged?.Invoke(previous, target);   // Enter 직전에 통보
                     target.Enter();
-
-                    StateChanged?.Invoke(previous, target);
                 }
             }
             finally
