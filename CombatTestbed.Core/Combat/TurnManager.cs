@@ -14,6 +14,7 @@ namespace CombatTestbed.Core.Combat
         public BattleActor Player { get; }
         public BattleActor Monster { get; }
         public ActionPipeline Pipeline { get; }
+        private readonly IActionSelector _monsterSelector;
 
         /// <summary>
         /// 현재 전투 라운드 (1부터 시작)
@@ -59,11 +60,14 @@ namespace CombatTestbed.Core.Combat
         /// </summary>
         public event Action<BattleActor?>? BattleEnded;
 
-        public TurnManager(BattleActor player, BattleActor monster, ActionPipeline pipeline)
+        public TurnManager(BattleActor player, BattleActor monster, ActionPipeline pipeline, IActionSelector? monsterSelector = null)
         {
             Player = player ?? throw new ArgumentNullException(nameof(player));
             Monster = monster ?? throw new ArgumentNullException(nameof(monster));
             Pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+
+            // 지정하지 않으면 기본 일반 공격 (기존 동작 유지)
+            _monsterSelector = monsterSelector ?? new BasicAttackSelector();
 
             CurrentRound = 1;
         }
@@ -85,10 +89,12 @@ namespace CombatTestbed.Core.Combat
             // 1. 플레이어 턴 실행 (상대는 몬스터)
             ExecuteTurn(Player, Monster, playerAction);
 
-            // 2. 플레이어 턴에서 전투가 끝나지 않았다면 몬스터 턴 실행 (상대는 플레이어)
+            // 2. 플레이어 턴에서 전투가 끝나지 않았다면 몬스터 턴 실행 (행동은 선택기가 결정)
             if (!IsBattleOver)
             {
-                var monsterAction = new AttackAction(Monster, Player);
+                ICombatAction monsterAction = _monsterSelector.SelectAction(Monster, Player)
+                    ?? throw new InvalidOperationException("몬스터 행동 선택기가 null 행동을 반환했습니다.");
+
                 ExecuteTurn(Monster, Player, monsterAction);
             }
 
