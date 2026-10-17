@@ -1,0 +1,7 @@
+{
+  "name": "com.combattestbed.core",
+  "version": "0.1.0",
+  "displayName": "Combat Testbed Core",
+  "description": "Pure C# combat domain core with no engine dependency",
+  "unity": "6000.0"
+}
