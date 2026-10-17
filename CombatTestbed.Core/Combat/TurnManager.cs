@@ -4,6 +4,7 @@ using CombatTestbed.Core.Combat.States;
 using CombatTestbed.Core.Common;
 using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Pipeline;
+#nullable enable
 
 namespace CombatTestbed.Core.Combat
 {

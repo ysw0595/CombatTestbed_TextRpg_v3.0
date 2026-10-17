@@ -361,3 +361,29 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+artifacts/
+
+# Unity 자동 생성물
+CombatTestbed.Unity/[Ll]ibrary/
+CombatTestbed.Unity/[Tt]emp/
+CombatTestbed.Unity/[Oo]bj/
+CombatTestbed.Unity/[Bb]uild/
+CombatTestbed.Unity/[Bb]uilds/
+CombatTestbed.Unity/[Ll]ogs/
+CombatTestbed.Unity/[Uu]ser[Ss]ettings/
+CombatTestbed.Unity/*.csproj
+CombatTestbed.Unity/*.sln
+
+# Visual Studio 템플릿의 NuGet 'Packages' 무시 규칙에서 Unity 패키지 설정 파일은 제외
+!CombatTestbed.Unity/Packages/manifest.json
+!CombatTestbed.Unity/Packages/packages-lock.json
+
+# Unity Version Control(Plastic) 데이터
+CombatTestbed.Unity/.plastic/
+
+CombatTestbed.Unity/*.slnx
+CombatTestbed.Unity/ignore.conf
+
+# Unity가 만드는 .meta 파일은 커밋 대상 (다른 무시 규칙이 있어도 다시 포함)
+!*.meta

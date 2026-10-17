@@ -1,5 +1,6 @@
 ﻿using System;
 using CombatTestbed.Core.Actions;
+#nullable enable
 
 namespace CombatTestbed.Core.Pipeline
 {
@@ -18,10 +19,10 @@ namespace CombatTestbed.Core.Pipeline
         public ActionResult Execute(ICombatAction action)
         {
             // null 방어: 파이프라인에 빈 명령서가 들어오는 것을 차단
-            ArgumentNullException.ThrowIfNull(action);
-
+            if (action == null) throw new ArgumentNullException(nameof(action));
+   
             // 게임 규칙상 실행할 수 없는 상태(마비, 대상 사망 등)는 예외가 아닌 실패 결과로 보고
-            ActionResult result = action.CanExecute()
+               ActionResult result = action.CanExecute()
                 ? action.Execute()
                 : ActionResult.Failure(
                     action.Source,

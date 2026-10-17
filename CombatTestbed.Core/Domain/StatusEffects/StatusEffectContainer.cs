@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CombatTestbed.Core.Domain.Actors;
+#nullable enable
 
 namespace CombatTestbed.Core.Domain.StatusEffects
 {

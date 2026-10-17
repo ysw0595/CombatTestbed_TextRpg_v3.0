@@ -1,6 +1,7 @@
 ﻿using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
 using System;
+#nullable enable
 
 namespace CombatTestbed.Core.Domain.Actors
 {
