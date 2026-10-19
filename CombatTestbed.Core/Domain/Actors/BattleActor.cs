@@ -1,4 +1,5 @@
-﻿using CombatTestbed.Core.Domain.Stats;
+﻿using CombatTestbed.Core.Domain.Formulas;
+using CombatTestbed.Core.Domain.Stats;
 using CombatTestbed.Core.Domain.StatusEffects;
 using System;
 #nullable enable
@@ -84,9 +85,8 @@ namespace CombatTestbed.Core.Domain.Actors
         {
             if (Health.IsDead) return 0;
 
-            // 방어력 공식: [ 들어온 피해 - 방어력 ] (최소 1 피해 보장)
-            int defense = Stats.GetValue(StatType.Defense);
-            int finalDamage = Math.Max(1, rawDamage - defense);
+            // 방어력 공식은 CombatFormula가 담당
+            int finalDamage = CombatFormula.ApplyDefense(rawDamage, Stats.GetValue(StatType.Defense));
 
             return ResolveDamage(finalDamage);
         }
