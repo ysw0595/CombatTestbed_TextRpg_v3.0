@@ -46,5 +46,24 @@ namespace CombatTestbed.Core.Content
             SkillEffectData.FlatStatGain(EffectTarget.Self, StatType.Attack, 8),
             SkillEffectData.FlatHeal(EffectTarget.Self, 40)
         });
+
+        // ---- 챕터 진행 보상 ----
+
+        /// <summary>
+        /// 보스를 쓰러뜨린 뒤 체력을 모두 회복하는 보상 ("달의 가호")
+        /// </summary>
+        public static readonly RewardDefinition MoonBlessing = new RewardDefinition("reward_moon_blessing", new[]
+        {
+    SkillEffectData.Heal(EffectTarget.Self, StatType.MaxHp, 1.0f)
+});
+
+        /// <summary>
+        /// 챕터 3의 강화 ("붉은 달"): 최대 체력과 공격력이 2배가 됩니다.
+        /// </summary>
+        public static readonly RewardDefinition BloodMoonEnhance = new RewardDefinition("reward_bloodmoon_enhance", new[]
+        {
+    SkillEffectData.StatGain(EffectTarget.Self, StatType.MaxHp, 1.0f),
+    SkillEffectData.StatGain(EffectTarget.Self, StatType.Attack, 1.0f)
+});
     }
 }
