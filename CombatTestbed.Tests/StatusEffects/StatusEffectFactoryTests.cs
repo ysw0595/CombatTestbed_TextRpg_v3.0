@@ -28,5 +28,14 @@ namespace CombatTestbed.Tests.Domain.StatusEffects
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => StatusEffectFactory.Create(StatusEffectType.None, 1));
         }
+
+        [Test]
+        public void 혈석_종류는_혈석_효과를_지정한_스택으로_만들어야_한다()
+        {
+            IStatusEffect effect = StatusEffectFactory.Create(StatusEffectType.BloodDiamond, 2);
+
+            Assert.That(effect, Is.TypeOf<BloodDiamondEffect>());
+            Assert.That(effect.Stacks, Is.EqualTo(2));
+        }
     }
 }

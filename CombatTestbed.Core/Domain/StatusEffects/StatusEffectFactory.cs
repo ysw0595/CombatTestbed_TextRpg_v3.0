@@ -18,6 +18,8 @@ namespace CombatTestbed.Core.Domain.StatusEffects
                     return new BleedEffect(stacks);
                 case StatusEffectType.Paralysis:
                     return new ParalysisEffect(stacks);
+                case StatusEffectType.BloodDiamond:
+                    return new BloodDiamondEffect(stacks);
                 default:
                     throw new ArgumentOutOfRangeException(
                         nameof(type), type, "지원하지 않는 상태 이상 종류입니다.");
