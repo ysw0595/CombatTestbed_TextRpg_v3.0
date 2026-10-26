@@ -1,0 +1,16 @@
+{
+  "name": "CombatTestbed.Presentation",
+  "rootNamespace": "CombatTestbed.Presentation",
+  "references": [
+    "CombatTestbed.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="CombatTestbed.Core/CombatTestbed.Core.csproj" />
+  <Project Path="CombatTestbed.Presentation/CombatTestbed.Presentation.csproj" Id="d3c8b30f-4d9b-4ddd-afd3-260b4feadd17" />
   <Project Path="CombatTestbed.Tests/CombatTestbed.Tests.csproj" Id="096a7168-0888-4f9a-b9f0-d3b48e1ca355" />
 </Solution>

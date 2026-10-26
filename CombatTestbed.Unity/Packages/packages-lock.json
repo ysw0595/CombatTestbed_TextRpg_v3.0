@@ -6,6 +6,12 @@
       "source": "local",
       "dependencies": {}
     },
+    "com.combattestbed.presentation": {
+      "version": "file:../../CombatTestbed.Presentation",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "15.1.0",
       "depth": 0,

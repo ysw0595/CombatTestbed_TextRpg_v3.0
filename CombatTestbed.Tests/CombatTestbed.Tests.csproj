@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CombatTestbed.Core\CombatTestbed.Core.csproj" />
+    <ProjectReference Include="..\CombatTestbed.Presentation\CombatTestbed.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

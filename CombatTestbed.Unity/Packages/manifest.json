@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.combattestbed.core": "file:../../CombatTestbed.Core",
+    "com.combattestbed.presentation": "file:../../CombatTestbed.Presentation",
     "com.unity.2d.animation": "15.1.0",
     "com.unity.2d.aseprite": "5.0.3",
     "com.unity.2d.psdimporter": "14.0.3",
