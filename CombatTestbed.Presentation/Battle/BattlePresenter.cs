@@ -17,7 +17,7 @@ namespace CombatTestbed.Presentation.Battle
     /// 스킬 선택지를 주입하며, 선택된 스킬을 캠페인에 전달합니다.
     /// 구독이 많으므로 사용이 끝나면 반드시 Dispose해서 해제해야 합니다.
     /// </summary>
-    public sealed class BattlePresenter : IDisposable
+    public sealed class BattlePresenter : IDisposable, IChoiceHandler
     {
         private readonly IBattleView _view;
         private readonly ChoicePresenter _choices;
