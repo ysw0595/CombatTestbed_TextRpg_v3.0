@@ -2,6 +2,7 @@
 using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.StatusEffects;
 using CombatTestbed.Tests.TestUtils;
+using System.Linq;
 
 namespace CombatTestbed.Tests.Domain.StatusEffects
 {
@@ -157,6 +158,21 @@ namespace CombatTestbed.Tests.Domain.StatusEffects
             Assert.That(hasEffectWhenApplied, Is.True);
             Assert.That(stacksSeenWhenChanged, Is.EqualTo(1));
             Assert.That(hasEffectWhenRemoved, Is.False);
+        }
+
+        [Test]
+        public void 현재_걸려_있는_효과_목록은_걸린_순서대로_조회되고_소멸하면_사라져야_한다()
+        {
+            var actor = TestActorFactory.Create(maxHp: 100);
+            Assert.That(actor.StatusEffects.Effects.Count, Is.EqualTo(0));
+
+            actor.StatusEffects.ApplyEffect(actor, new PoisonEffect(1));
+            actor.StatusEffects.ApplyEffect(actor, new BleedEffect(2));
+            Assert.That(actor.StatusEffects.Effects.Select(e => e.Name), Is.EqualTo(new[] { "중독", "출혈" }));
+
+            actor.EndTurn(); // 독 1스택 -> 피해 후 소멸
+
+            Assert.That(actor.StatusEffects.Effects.Select(e => e.Name), Is.EqualTo(new[] { "출혈" }));
         }
     }
 }

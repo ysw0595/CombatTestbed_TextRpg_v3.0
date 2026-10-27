@@ -168,5 +168,16 @@ namespace CombatTestbed.Core.Domain.StatusEffects
                 EffectStacksChanged?.Invoke(effect);
             }
         }
+
+        // 필드 선언부 근처 (기존 _effects 아래)에 생성자 추가
+        public StatusEffectContainer()
+        {
+            Effects = _effects.AsReadOnly();
+        }
+
+        /// <summary>
+        /// 지금 걸려 있는 상태 이상 목록 (걸린 순서, 읽기 전용). 화면 표시용입니다.
+        /// </summary>
+        public IReadOnlyList<IStatusEffect> Effects { get; }
     }
 }
