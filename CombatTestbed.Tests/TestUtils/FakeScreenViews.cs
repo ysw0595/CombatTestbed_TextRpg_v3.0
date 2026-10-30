@@ -75,4 +75,26 @@ namespace CombatTestbed.Tests.TestUtils
             return $"ending:{result}:{lastStage.Chapter.Id}";
         }
     }
+
+    /// <summary>
+    /// 전투 연출 문구 공급자의 가짜입니다. 미리 넣어 둔 문구만 돌려주고, 없으면 null입니다.
+    /// </summary>
+    public class FakeEncounterTextProvider : IEncounterTextProvider
+    {
+        public System.Collections.Generic.Dictionary<string, string> Appear { get; }
+            = new System.Collections.Generic.Dictionary<string, string>();
+
+        public System.Collections.Generic.Dictionary<string, string> Slain { get; }
+            = new System.Collections.Generic.Dictionary<string, string>();
+
+        public string? GetAppearText(string actorId)
+        {
+            return Appear.TryGetValue(actorId, out string? text) ? text : null;
+        }
+
+        public string? GetSlainText(string actorId)
+        {
+            return Slain.TryGetValue(actorId, out string? text) ? text : null;
+        }
+    }
 }

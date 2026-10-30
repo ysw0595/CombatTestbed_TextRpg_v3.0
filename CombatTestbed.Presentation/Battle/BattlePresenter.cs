@@ -9,6 +9,7 @@ using CombatTestbed.Core.Domain.Actors;
 using CombatTestbed.Core.Domain.StatusEffects;
 using CombatTestbed.Core.Skills;
 using CombatTestbed.Presentation.Choices;
+using CombatTestbed.Presentation.Screens;
 
 namespace CombatTestbed.Presentation.Battle
 {
@@ -21,6 +22,7 @@ namespace CombatTestbed.Presentation.Battle
     {
         private readonly IBattleView _view;
         private readonly ChoicePresenter _choices;
+        private readonly IEncounterTextProvider? _texts;
         private readonly List<string> _pendingLines = new List<string>();
 
         private CampaignManager? _campaign;
@@ -31,10 +33,12 @@ namespace CombatTestbed.Presentation.Battle
         private bool _actionResolvedThisTurn;
         private bool _disposed;
 
-        public BattlePresenter(IBattleView view, ChoicePresenter choices)
+        /// <param name="texts">등장 연출 문구 공급자. 생략하면 연출 문구 없이 진행합니다.</param>
+        public BattlePresenter(IBattleView view, ChoicePresenter choices, IEncounterTextProvider? texts = null)
         {
             _view = view ?? throw new ArgumentNullException(nameof(view));
             _choices = choices ?? throw new ArgumentNullException(nameof(choices));
+            _texts = texts;
         }
 
         /// <summary>
@@ -108,6 +112,7 @@ namespace CombatTestbed.Presentation.Battle
             _enemyObserver.Attach();
 
             _view.ClearLog();
+            AppendAppearText(battle.Monster);
             _view.SetHeader(BattleMessages.Header(_stage, 1));
             RefreshActors();
             _choices.SetChoices(BuildSkillChoices());
@@ -214,6 +219,16 @@ namespace CombatTestbed.Presentation.Battle
         }
 
         // ---- 공통 ----
+
+        // 등장 연출 문구가 있으면 로그의 첫 줄로 보여 줍니다. (선택 사항이라 없으면 아무것도 하지 않음)
+        private void AppendAppearText(BattleActor enemy)
+        {
+            string? text = _texts?.GetAppearText(enemy.Id);
+            if (text != null)
+            {
+                _view.AppendLog(text);
+            }
+        }
 
         /// <summary>
         /// 행동이 끝난 뒤라면 바로 기록하고, 행동 중이라면 행동 문구 뒤에 나오도록 보관해 둡니다.
