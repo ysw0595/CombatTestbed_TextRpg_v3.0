@@ -79,5 +79,20 @@ namespace CombatTestbed.Tests.Balance
 
             Assert.That(picked.Id, Is.EqualTo(DefaultSkills.BatFire.Id));
         }
+
+        [Test]
+        public void 최대_피해_전략은_자해_피해에_가중치를_두어_체력이_깎이는_스킬을_피해야_한다()
+        {
+            // 최대 체력 100, 공격력 40 -> Blood_Explosion: 상대 96, 자해 30
+            // 가중치 1이면 96 - 30 = 66 > 40 이라 Blood_Explosion, 가중치 3이면 96 - 90 = 6 < 40 이라 기본 공격
+            CampaignManager campaign = CreateCampaign(maxHp: 100, attack: 40);
+            campaign.SkillBook.Learn(DefaultSkills.BloodExplosion);
+
+            var weighted = new GreedyDamagePolicy().Choose(campaign, new SystemRandomSource(1));
+            var unweighted = new GreedyDamagePolicy(selfDamageWeight: 1).Choose(campaign, new SystemRandomSource(1));
+
+            Assert.That(weighted.Id, Is.EqualTo(DefaultSkills.BatFire.Id));
+            Assert.That(unweighted.Id, Is.EqualTo(DefaultSkills.BloodExplosion.Id));
+        }
     }
 }

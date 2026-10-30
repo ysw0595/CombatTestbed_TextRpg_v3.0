@@ -72,11 +72,25 @@ namespace CombatTestbed.Core.Balance
     }
 
     /// <summary>
-    /// 지금 당장 (상대에게 줄 피해 - 나에게 돌아오는 피해)가 가장 큰 스킬을 고릅니다.
+    /// 지금 당장 (상대에게 줄 피해 - 나에게 돌아오는 피해 x 가중치)가 가장 큰 스킬을 고릅니다.
+    /// 전투 사이에 체력을 회복하기 어려워서, 자해 피해는 가중치만큼 더 큰 손해로 계산합니다.
     /// 동점이면 먼저 배운 스킬입니다. (앞날을 보지 않고 눈앞의 최선만 고르는 플레이어)
     /// </summary>
     public sealed class GreedyDamagePolicy : SkillPolicyBase
     {
+        private readonly int _selfDamageWeight;
+
+        /// <param name="selfDamageWeight">자해 피해를 몇 배의 손해로 볼지. 1이면 상대 피해와 같은 무게입니다.</param>
+        public GreedyDamagePolicy(int selfDamageWeight = 3)
+        {
+            if (selfDamageWeight < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(selfDamageWeight), "가중치는 1 이상이어야 합니다.");
+            }
+
+            _selfDamageWeight = selfDamageWeight;
+        }
+
         public override string Name => "눈앞의 최대 피해";
 
         protected override SkillDefinition Pick(
@@ -99,7 +113,7 @@ namespace CombatTestbed.Core.Balance
             return best;
         }
 
-        private static int Score(BattleActor player, SkillDefinition skill)
+        private int Score(BattleActor player, SkillDefinition skill)
         {
             int score = 0;
 
@@ -110,8 +124,8 @@ namespace CombatTestbed.Core.Balance
                 int amount = CombatFormula.CalculateAmount(
                     effect.FlatValue, player.Stats.GetValue(effect.ScalingStat), effect.Coefficient);
 
-                // 상대에게 주는 피해는 이득, 나에게 주는 피해(Blood_Explosion의 자해 등)는 손해
-                score += effect.Target == EffectTarget.Opponent ? amount : -amount;
+                // 상대에게 주는 피해는 이득, 나에게 주는 피해는 가중치만큼 손해
+                score += effect.Target == EffectTarget.Opponent ? amount : -amount * _selfDamageWeight;
             }
 
             return score;
