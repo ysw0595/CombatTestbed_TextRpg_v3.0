@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb7ca8c928684c0488755f0ee2efe1b6, type: 3}
+  m_Name: DefaultCampaign
+  m_EditorClassIdentifier: Assembly-CSharp::CampaignData
+  _player: {fileID: 11400000, guid: 6e859fecf46b9524e9626541341db00f, type: 2}
+  _startingSkills:
+  - {fileID: 11400000, guid: 17e359d961eb2ad49a3e6d40a04150a9, type: 2}
+  _learnableSkills:
+  - {fileID: 11400000, guid: 17e359d961eb2ad49a3e6d40a04150a9, type: 2}
+  - {fileID: 11400000, guid: 06131a0523de7644e9f353e7b3f4e6c2, type: 2}
+  - {fileID: 11400000, guid: bd062c30ac9f8fa458f7a2b18da73c3e, type: 2}
+  - {fileID: 11400000, guid: ff1cc9e7dd33c9445810a8fbdc5f39d8, type: 2}
+  - {fileID: 11400000, guid: f8daf9b88c644ed4ab8b9816a8554bc7, type: 2}
+  _chapters:
+  - {fileID: 11400000, guid: eec9f7e012c721c45b00966b9b93b674, type: 2}
+  - {fileID: 11400000, guid: 4c98317d0f1eccd4b8ab2fdea1b19fc2, type: 2}
+  - {fileID: 11400000, guid: 6a8b2f0842c0fdf4994563f9ecdd6a33, type: 2}

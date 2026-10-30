@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 727d82f1bdbc16247a01195ed8647562, type: 3}
+  m_Name: chapter1
+  m_EditorClassIdentifier: Assembly-CSharp::ChapterData
+  _id: chapter1
+  _displayName: "\uD3ED\uD48D\uC804\uC57C"
+  _stages:
+  - _type: 0
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 2
+    _grantsSkill: 1
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 1
+    _grantsSkill: 0
+    _clearReward: {fileID: 0}
+  - _type: 3
+    _grantsSkill: 1
+    _clearReward: {fileID: 11400000, guid: 560266ea10acf264bbacd09c42d6052c, type: 2}
+  _monsterPool:
+  - {fileID: 11400000, guid: b83945d1577fd0a4fa8710eab63566e5, type: 2}
+  - {fileID: 11400000, guid: 8d654b8ac17c0424aa071609a41dc051, type: 2}
+  - {fileID: 11400000, guid: 2513f04fed9d21345b79826e49090084, type: 2}
+  _boss: {fileID: 11400000, guid: 820e4cd047bdc8245822ddd9f67315b6, type: 2}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1c5c1bb482276d478d6e309921ef706, type: 3}
+  m_Name: priest_pray
+  m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  _id: priest_pray
+  _displayName: "\uAE30\uB3C4"
+  _effects:
+  - Kind: 1
+    Target: 0
+    ScalingStat: 1
+    Coefficient: 0
+    FlatValue: 10
+    DamageType: 0
+    StatusType: 0
+    Stacks: 0

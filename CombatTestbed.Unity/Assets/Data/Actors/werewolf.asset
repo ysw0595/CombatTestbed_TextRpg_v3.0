@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6eba3930a857494da231aae48557c38, type: 3}
+  m_Name: werewolf
+  m_EditorClassIdentifier: Assembly-CSharp::ActorData
+  _id: werewolf
+  _displayName: "\uB291\uB300\uC778\uAC04"
+  _role: 1
+  _maxHp: 60
+  _attack: 15
+  _defense: 0
+  _reward: {fileID: 11400000, guid: c16c90b8294adfc43aadb7af41ebab7c, type: 2}
+  _behaviorSkills: []
