@@ -15,8 +15,8 @@ MonoBehaviour:
   _id: farmer
   _displayName: "\uB18D\uBD80"
   _role: 1
-  _maxHp: 20
-  _attack: 2
+  _maxHp: 40
+  _attack: 4
   _defense: 0
   _reward: {fileID: 11400000, guid: d0aaf2676cf98174fa68af2daf057543, type: 2}
   _behaviorSkills: []

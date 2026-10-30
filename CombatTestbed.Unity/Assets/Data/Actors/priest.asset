@@ -15,8 +15,8 @@ MonoBehaviour:
   _id: priest
   _displayName: "\uC131\uC9C1\uC790"
   _role: 1
-  _maxHp: 50
-  _attack: 10
+  _maxHp: 90
+  _attack: 12
   _defense: 0
   _reward: {fileID: 0}
   _behaviorSkills:

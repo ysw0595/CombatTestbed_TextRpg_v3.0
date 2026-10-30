@@ -15,8 +15,8 @@ MonoBehaviour:
   _id: knight
   _displayName: "\uAE30\uC0AC"
   _role: 1
-  _maxHp: 80
-  _attack: 17
+  _maxHp: 90
+  _attack: 12
   _defense: 0
   _reward: {fileID: 11400000, guid: 8664679bf1367224d8cb704c84d5af60, type: 2}
   _behaviorSkills: []

@@ -15,8 +15,8 @@ MonoBehaviour:
   _id: hunter
   _displayName: "\uC0AC\uB0E5\uAFBC"
   _role: 1
-  _maxHp: 25
-  _attack: 5
+  _maxHp: 50
+  _attack: 15
   _defense: 0
   _reward: {fileID: 11400000, guid: 79d58a0758999c9468a96baebc2883fb, type: 2}
   _behaviorSkills: []

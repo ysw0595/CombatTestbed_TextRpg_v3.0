@@ -15,8 +15,8 @@ MonoBehaviour:
   _id: werewolf
   _displayName: "\uB291\uB300\uC778\uAC04"
   _role: 1
-  _maxHp: 60
-  _attack: 15
+  _maxHp: 70
+  _attack: 10
   _defense: 0
   _reward: {fileID: 11400000, guid: c16c90b8294adfc43aadb7af41ebab7c, type: 2}
   _behaviorSkills: []

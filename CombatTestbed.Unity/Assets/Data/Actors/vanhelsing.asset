@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: "\uBC18 \uD5EC\uC2F1"
   _role: 1
   _maxHp: 150
-  _attack: 20
+  _attack: 15
   _defense: 0
   _reward: {fileID: 0}
   _behaviorSkills:
