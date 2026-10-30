@@ -26,6 +26,10 @@ public class GameBootstrapper : MonoBehaviour
     [Header("선택 버튼")]
     [SerializeField] private ChoiceButtonsView _choiceButtons;
 
+    [Header("캠페인 데이터")]
+    [Tooltip("한 판의 구성(플레이어, 스킬, 챕터, 몬스터 등)을 담은 데이터 에셋입니다.")]
+    [SerializeField] private CampaignData _campaignData;
+
     [Header("시나리오 텍스트")]
     [Tooltip("Resources 폴더 안에서 시나리오 텍스트 파일을 찾을 폴더 이름입니다.")]
     [SerializeField] private string _scenarioFolder = "Scenario";
@@ -40,6 +44,13 @@ public class GameBootstrapper : MonoBehaviour
     // 모든 오브젝트의 Awake(버튼 연결, 화면 숨김)가 끝난 뒤에 조립해야 안전하기 때문입니다.
     private void Start()
     {
+        if (_campaignData == null)
+        {
+            Debug.LogError("[GameBootstrapper] Campaign Data가 연결되지 않았습니다. " +
+                           "메뉴 Combat Testbed > Generate Default Data를 실행한 뒤 연결해 주세요.", this);
+            return;
+        }
+
         IRandomSource random = _randomSeed == 0
             ? new SystemRandomSource()
             : new SystemRandomSource(_randomSeed);
@@ -61,8 +72,8 @@ public class GameBootstrapper : MonoBehaviour
         var texts = new ScenarioTextProvider(LoadScenarioText);
 
         var startChoices = new[]
-        {
-            new ActionChoice(DefaultActors.Vampire.Id, DefaultActors.Vampire.Name)
+ {
+            new ActionChoice(_campaignData.PlayerId, _campaignData.PlayerName)
         };
 
         var title = new TitlePresenter(_titleView, choices, startChoices);
@@ -79,11 +90,11 @@ public class GameBootstrapper : MonoBehaviour
         _game.Start();
     }
 
-    private static CampaignManager CreateCampaign(string characterId, IRandomSource random)
+    private CampaignManager CreateCampaign(string characterId, IRandomSource random)
     {
-        if (characterId == DefaultActors.Vampire.Id)
+        if (characterId == _campaignData.PlayerId)
         {
-            return DefaultCampaign.Create(random);
+            return _campaignData.CreateCampaign(random);
         }
 
         throw new ArgumentException($"알 수 없는 캐릭터입니다: {characterId}", nameof(characterId));
@@ -122,5 +133,9 @@ public class GameBootstrapper : MonoBehaviour
         _stageResultView = FindFirstObjectByType<StageResultView>(FindObjectsInactive.Include);
         _endingView = FindFirstObjectByType<EndingView>(FindObjectsInactive.Include);
         _choiceButtons = FindFirstObjectByType<ChoiceButtonsView>(FindObjectsInactive.Include);
+
+#if UNITY_EDITOR
+        _campaignData = UnityEditor.AssetDatabase.LoadAssetAtPath<CampaignData>("Assets/Data/DefaultCampaign.asset");
+#endif
     }
 }
