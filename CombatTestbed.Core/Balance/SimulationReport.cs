@@ -94,12 +94,12 @@ namespace CombatTestbed.Core.Balance
             return sb.ToString().TrimEnd();
         }
 
-        private static string Percent(double ratio)
+        internal static string Percent(double ratio)
         {
             return (ratio * 100).ToString("F1", CultureInfo.InvariantCulture) + "%";
         }
 
-        private static string Number(double value)
+        internal static string Number(double value)
         {
             return value.ToString("F1", CultureInfo.InvariantCulture);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CombatTestbed.Core.Campaign;
 using CombatTestbed.Core.Common;
+using CombatTestbed.Core.Definitions;
 using UnityEngine;
 
 /// <summary>
@@ -29,15 +30,23 @@ public class CampaignData : ScriptableObject
     public string PlayerName => RequirePlayer().DisplayName;
 
     /// <summary>
+    /// 플레이어 정의를 새로 만들어 돌려줍니다. (스윕에서 값 일부만 바꿔 쓰는 용도)
+    /// </summary>
+    public ActorDefinition PlayerDefinition => RequirePlayer().ToDefinition();
+
+    /// <summary>
     /// 이 데이터로 새 캠페인을 만듭니다. 호출할 때마다 새 정의 객체를 만들어서, 다시 시작해도 안전합니다.
     /// </summary>
-    public CampaignManager CreateCampaign(IRandomSource random)
+    /// <param name="playerOverride">지정하면 SO의 플레이어 대신 이 정의를 씁니다. (스윕에서 스탯을 바꿔 볼 때 사용)</param>
+    public CampaignManager CreateCampaign(IRandomSource random, ActorDefinition playerOverride = null)
     {
         var chapters = DataGuard.ConvertAll(this, nameof(_chapters), _chapters, c => c.ToDefinition());
         var starting = DataGuard.ConvertAll(this, nameof(_startingSkills), _startingSkills, s => s.ToDefinition());
         var learnable = DataGuard.ConvertAll(this, nameof(_learnableSkills), _learnableSkills, s => s.ToDefinition());
 
-        return new CampaignManager(chapters, RequirePlayer().ToDefinition(), starting, learnable, random);
+        ActorDefinition player = playerOverride ?? RequirePlayer().ToDefinition();
+
+        return new CampaignManager(chapters, player, starting, learnable, random);
     }
 
     private ActorData RequirePlayer()
