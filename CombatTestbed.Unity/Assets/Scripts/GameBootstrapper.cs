@@ -66,9 +66,9 @@ public class GameBootstrapper : MonoBehaviour
         };
 
         var title = new TitlePresenter(_titleView, choices, startChoices);
-        var story = new StoryPresenter(_storyView, choices, texts);
-        var battle = new BattlePresenter(_battleView, choices);
-        var result = new StageResultPresenter(_stageResultView, choices);
+        var story = new StoryPresenter(_storyView, choices, texts); 
+        var battle = new BattlePresenter(_battleView, choices, texts);
+        var result = new StageResultPresenter(_stageResultView, choices, texts);
         var ending = new EndingPresenter(_endingView, choices, texts);
 
         _game = new GameController(
